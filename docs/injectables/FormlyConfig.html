@@ -193,6 +193,9 @@
                                     <a href="../interfaces/ConfigOption.html" >ConfigOption</a>
                                 </li>
                                 <li class="link">
+                                    <a href="../interfaces/FieldValidatorFn.html" >FieldValidatorFn</a>
+                                </li>
+                                <li class="link">
                                     <a href="../interfaces/FormlyFieldConfig.html" >FormlyFieldConfig</a>
                                 </li>
                                 <li class="link">
@@ -442,6 +445,9 @@
                    >
                                        <li class="link">
                                            <a href="../interfaces/ConfigOption.html" >ConfigOption</a>
+                                       </li>
+                                       <li class="link">
+                                           <a href="../interfaces/FieldValidatorFn.html" >FieldValidatorFn</a>
                                        </li>
                                        <li class="link">
                                            <a href="../interfaces/FormlyFieldConfig.html" >FormlyFieldConfig</a>
@@ -1760,7 +1766,7 @@
 
     <div class="tab-pane fade tab-source-code" id="c-source">
         <pre class="line-numbers"><code class="language-typescript">import { Injectable, Inject, InjectionToken } from &#x27;@angular/core&#x27;;
-import { ValidationErrors, FormGroup, FormArray } from &#x27;@angular/forms&#x27;;
+import { ValidationErrors, FormGroup, FormArray, AbstractControl } from &#x27;@angular/forms&#x27;;
 import { Field } from &#x27;./../templates/field&#x27;;
 import { reverseDeepMerge } from &#x27;./../utils&#x27;;
 import { FormlyFieldConfig, FormlyFormOptions } from &#x27;../components/formly.field.config&#x27;;
@@ -1961,9 +1967,13 @@ export interface WrapperOption {
   types?: string[];
 }
 
+export interface FieldValidatorFn {
+  (c: AbstractControl, field: FormlyFieldConfig): ValidationErrors | null;
+}
+
 export interface ValidatorOption {
   name: string;
-  validation: string | ValidationErrors;
+  validation: FieldValidatorFn;
 }
 
 export interface ValidationMessageOption {

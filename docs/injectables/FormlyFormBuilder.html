@@ -193,6 +193,9 @@
                                     <a href="../interfaces/ConfigOption.html" >ConfigOption</a>
                                 </li>
                                 <li class="link">
+                                    <a href="../interfaces/FieldValidatorFn.html" >FieldValidatorFn</a>
+                                </li>
+                                <li class="link">
                                     <a href="../interfaces/FormlyFieldConfig.html" >FormlyFieldConfig</a>
                                 </li>
                                 <li class="link">
@@ -442,6 +445,9 @@
                    >
                                        <li class="link">
                                            <a href="../interfaces/ConfigOption.html" >ConfigOption</a>
+                                       </li>
+                                       <li class="link">
+                                           <a href="../interfaces/FieldValidatorFn.html" >FieldValidatorFn</a>
                                        </li>
                                        <li class="link">
                                            <a href="../interfaces/FormlyFieldConfig.html" >FormlyFieldConfig</a>
@@ -736,7 +742,7 @@
     <div class="tab-pane fade tab-source-code" id="c-source">
         <pre class="line-numbers"><code class="language-typescript">import { Injectable } from &#x27;@angular/core&#x27;;
 import { FormGroup, FormArray, FormControl, AbstractControl, Validators } from &#x27;@angular/forms&#x27;;
-import { FormlyConfig } from &#x27;./formly.config&#x27;;
+import { FormlyConfig, FieldValidatorFn } from &#x27;./formly.config&#x27;;
 import { FORMLY_VALIDATORS, evalStringExpression, evalExpressionValueSetter, getFieldId, assignModelValue, getValueForKey, isObject, isNullOrUndefined } from &#x27;./../utils&#x27;;
 import { FormlyFieldConfig, FormlyFormOptions } from &#x27;../components/formly.field.config&#x27;;
 import { getKeyPath, isUndefined, isFunction } from &#x27;../utils&#x27;;
@@ -906,14 +912,10 @@ export class FormlyFormBuilder {
         }
       }
     }
+
     if (field.asyncValidators &amp;&amp; Array.isArray(field.asyncValidators.validation)) {
-      field.asyncValidators.validation.forEach((validate: any) &#x3D;&gt; {
-        if (typeof validate &#x3D;&#x3D;&#x3D; &#x27;string&#x27;) {
-          validators.push(this.formlyConfig.getValidator(validate).validation);
-        } else {
-          validators.push(validate);
-        }
-      });
+      field.asyncValidators.validation
+        .forEach((validator: any) &#x3D;&gt; validators.push(this.wrapNgValidatorFn(field, validator)));
     }
 
     if (validators.length) {
@@ -959,13 +961,8 @@ export class FormlyFormBuilder {
     }
 
     if (field.validators &amp;&amp; Array.isArray(field.validators.validation)) {
-      field.validators.validation.forEach((validate: any) &#x3D;&gt; {
-        if (typeof validate &#x3D;&#x3D;&#x3D; &#x27;string&#x27;) {
-          validators.push(this.formlyConfig.getValidator(validate).validation);
-        } else {
-          validators.push(validate);
-        }
-      });
+      field.validators.validation
+        .forEach((validator: any) &#x3D;&gt; validators.push(this.wrapNgValidatorFn(field, validator)));
     }
 
     if (validators.length) {
@@ -1067,6 +1064,14 @@ export class FormlyFormBuilder {
       case &#x27;max&#x27;:
         return Validators.max(value);
     }
+  }
+
+  private wrapNgValidatorFn(field: FormlyFieldConfig, validator: string | FieldValidatorFn) {
+    validator &#x3D; typeof validator &#x3D;&#x3D;&#x3D; &#x27;string&#x27;
+    ? this.formlyConfig.getValidator(validator).validation
+    : validator;
+
+    return (control: AbstractControl) &#x3D;&gt; (validator as FieldValidatorFn)(control, field);
   }
 }
 </code></pre>
